@@ -1,0 +1,698 @@
+$(document).ready(function() {
+
+    // var ajaxFnTl;
+    // $('.clrchat').click(function (h) {
+    //     $('#chat-info').empty();
+    //     $('#chat-content').empty();
+    //     console.log(ajaxFnTl);
+    //     clearTimeout(ajaxFnTl);
+    //     console.log(ajaxFnTl);
+    // });
+
+    $('.submitform').click(function (f) {
+        var send_username = $(this).attr('data-send_username');
+        var send_user_pic = $('.mychat').attr('data-send_user_pic');
+        var data_details = document.getElementById('chat-text').value;
+
+
+//         var chat_data_con = "<li class=" + 'media' + "><li class=" + 'reversed' + "><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'background-color:#3c4141;border-color:#3c4141;white-space:pre-line' + ">" + data_details + "</div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + 'Now' + "<a href=" + '#' + "></a></span></div></div></div><div class=" + 'media-right' + "><a href=" + '../account/?user=' + send_username + "><img src=" + '../../../img/' + send_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div></li></li>";
+// //                                        $(".chat-content").append(chat_data);
+//         $('#chat-content').append(chat_data_con);//Show fetched data from user
+
+        var elem = document.getElementById('chat-content');
+        elem.scrollTop = elem.scrollHeight;
+
+
+        var options = {
+            type: 'post',
+            url: '../../../views/user/contents/chat/',
+            dataType: 'json',
+            cache: false,
+            context: this,
+            beforeSend: function () {
+
+                document.getElementById('chat-form').reset();
+            },
+            success: function (data) {
+
+            },
+            complete: function (response) {
+
+            },
+            error: function () {
+
+
+            }
+
+        };
+
+        $("#chat-form").ajaxForm(options);
+    });
+    // var d = new Date();
+    // var dateISO = d.toISOString();
+    // document.getElementById("usn_chat_date").value=(dateISO);
+
+    $("#chat-text").keydown(function (event) {
+        if (event.keyCode === 13 && !event.shiftKey) {
+            event.preventDefault();
+            $("#myChatBtn").click();
+        }
+    });
+
+    // function myStopFunction() {
+    //     clearInterval(ajaxFn);
+    // }
+
+    // var input = document.getElementById("chat-text");
+    // input.addEventListener("keyup", function(event) {
+    //     event.preventDefault();
+    //     if (event.keyCode === 13 && !event.shiftKey) {
+    //         document.getElementById("myChatBtn").click();
+    //     }
+    // });
+
+    $('.reload').click(function (e) {
+        if ($('.reload').attr('data-action') == 'reload') {
+            location.reload();
+        }
+    });
+
+    function ajaxChtNtf() {
+        window.load = $('.chat_ntf').each(function () {
+            var send_username = $(this).attr('data-send_username');
+            var reci_username = $(this).attr('data-reci_username');
+            var row = {'send_username': send_username, 'reci_username': reci_username, 'chat_type': 'chat_data'};
+
+
+            $.ajax({
+                type: 'post',
+                url: '../../../views/user/contents/chat/chat.php', //Here you will fetch records
+                data: row, //Pass $id
+                dataType: 'json',
+                cache: false,
+                context: this,
+                beforeSend: function () {
+
+                },
+                success: function (data) {
+                    // console.log(data);
+                    // $('#unreadmsg').empty();
+                    // $('#unreadmsg').append(data[0]['rows']);
+
+                    if (($(this).attr('data-send_username') == data[0]['chat_to']) && ($(this).attr('data-reci_username') == data[0]['chat_from']) && (data[0]['unread_count'] != 0)) {
+                        $(this).empty();
+                        $(this).append(data[0]['unread_count']);
+                    } else {
+                        $(this).empty();
+                    }
+
+                },
+                complete: function (data) {
+                    setTimeout(ajaxChtNtf, 30000);
+                },
+                error: function (e) {
+                    // Error
+                }
+            });
+
+
+        });
+    }
+    ajaxChtNtf();
+
+    ajaxFnTl =  setInterval(function ajaxFn() {
+    window.load = $('.toolbar_chat_users').each(function () {
+        var send_username = $(this).attr('data-send_username');
+        var send_pic = $(this).attr('data-send_user_pic');
+        // console.log(send_username);
+        $.ajax({
+            type: 'post',
+            url: '../../../views/user/contents/chat/chat.php', //Here you will fetch records
+            data: {'send_username': send_username, 'chat_type': 'chat_tlbr'}, //Pass $id
+            dataType: 'json',
+            cache: false,
+            context: this,
+            success: function (data) {
+                // console.log(data);
+                // console.log(data.length);
+                if (data.length != 0) {
+
+                    // console.log(data[0]['unread_rows']);
+                    $(this).empty();
+                    $('#unreadmsg').empty();
+                    $('#unreadmsg').append(data[0]['unread_rows']);
+                    for (i = 0; i < data.length; i++) {
+
+                        local = data[i]['chat_utc_time'];
+                        var localDate = new Date(local);
+                        var today = new Date();
+                        var old_date = localDate.getDate();
+                        var new_date = today.getDate();
+                        var old_month = localDate.getMonth();
+                        var new_month = today.getMonth();
+                        var old_year = localDate.getYear();
+                        var new_year = today.getYear();
+                        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                        var day = days[localDate.getDay()];
+                        if ((new_date - old_date) == 0) {
+                            day = 'Today';
+
+                            var localDateString = localDate.toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+                            var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            var chat_time = day + '\n' + localTimeString;
+                        }
+                        if ((new_date - old_date) == 1) {
+                            day = 'Yesterday';
+
+                            var localDateString = localDate.toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+                            var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            var chat_time = day + '\n' + localTimeString;
+                        }
+                        if (((new_date - old_date) > 1) || ((new_date - old_date) < 0)) {
+
+
+                            var localDateString = localDate.toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+
+                            var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+
+                            var chat_time = localDateString + '\n' + localTimeString;
+                        }
+
+
+                        if (data[i]['unread_count'] == null) {
+                            data[i]['unread_count'] = '';
+                        }
+
+                        if (data[i]['chat_data_type'] == 'text') {
+                            if (data[i]['chat_data_details'].length > 45) {
+                                var str = data[i]['chat_data_details'];
+                                data[i]['chat_data_details'] = str.substring(0, 45);
+                            }
+
+                            var data_show = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + data[i]['username'] + "><img src=" + '../../../img/' + data[i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a><span class=" + 'unread_span' + ">" + data[i]['unread_count'] + "</span></div><div class=" + 'media-body' + "><a href=" + '#chat' + " class=" + 'mychat' + "  data-toggle=" + 'modal' + " data-ref=" + 'clearInterval(ajaxFn)' + " data-status=" + data[i]['is_active'] + " data-send_username=" + send_username + " data-reci_username=" + data[i]['username'] + " data-reci_user_pic=" + data[i]['user_pic'] + " data-send_user_pic=" + send_pic + "><span class=" + 'text-semibold' + ">" + data[i]['fullname'] + "</span><span class=" + 'time_class' + " style=" + 'white-space:pre-line' + ">" + chat_time + "</span></a><span class=" + 'text-muted' + ">" + data[i]['chat_data_details'] + "</span></div></li>";
+                            $(this).append(data_show);
+
+                        }
+                        if (data[i]['chat_data_type'] == 'image') {
+                            data[i]['chat_data_details'] = 'Image';
+
+
+                            var data_show = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + data[i]['username'] + "><img src=" + '../../../img/' + data[i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a><span class=" + 'unread_span' + ">" + data[i]['unread_count'] + "</span></div><div class=" + 'media-body' + "><a  href=" + '#chat' + " class=" + 'mychat' + "  data-toggle=" + 'modal' + " data-ref=" + 'clearInterval(ajaxFn)' + " data-status=" + data[i]['is_active'] + " data-send_username=" + send_username + " data-reci_username=" + data[i]['username'] + " data-reci_user_pic=" + data[i]['user_pic'] + " data-send_user_pic=" + send_pic + "><span class=" + 'text-semibold' + ">" + data[i]['fullname'] + "</span><span class=" + 'time_class' + " style=" + 'white-space:pre-line' + ">" + chat_time + "</span></a><span class=" + 'text-muted' + ">" + data[i]['chat_data_details'] + "</span></div></li>";
+                            $(this).append(data_show);
+
+                        }
+                        if (data[i]['chat_data_type'] == 'file') {
+                            data[i]['chat_data_details'] = 'File';
+
+
+                            var data_show = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + data[i]['username'] + "><img src=" + '../../../img/' + data[i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a><span class=" + 'unread_span' + ">" + data[i]['unread_count'] + "</span></div><div class=" + 'media-body' + "><a href=" + '#chat' + " class=" + 'mychat' + "  data-toggle=" + 'modal' + " data-ref=" + 'clearInterval(ajaxFn)' + " data-status=" + data[i]['is_active'] + " data-send_username=" + send_username + " data-reci_username=" + data[i]['username'] + " data-reci_user_pic=" + data[i]['user_pic'] + " data-send_user_pic=" + send_pic + "><span class=" + 'text-semibold' + ">" + data[i]['fullname'] + "</span><span class=" + 'time_class' + " style=" + 'white-space:pre-line' + ">" + chat_time + "</span></a><span class=" + 'text-muted' + ">" + data[i]['chat_data_details'] + "</span></div></li>";
+                            $(this).append(data_show);
+
+                        }
+
+                        $('.time_class').addClass('media-annotation').addClass('pull-right');
+                        $('.mychat').addClass('media-heading');
+                        $('.unread_span').addClass('badge').addClass('bg-blue-400').addClass('media-badge').addClass('chat_ntf');
+
+
+                    }
+
+                } else {
+                    $('#unreadmsg').empty();
+                    $('#unreadmsg').append(0);
+                    $(this).empty();
+                    $(this).append("<center><h6>" + 'No Messages' + "</h6></center>");
+                }
+
+            },
+            complete: function (data) {
+                $('.mychat').click(function (e) {
+                    // $('.mychat').attr('data-ref');
+                    $('#chat-content').empty();
+                    $('#chat-info').empty();
+                    e.preventDefault();
+                    // var priorData = $('.mychat').data('refresh');
+                    // // console.log(priorData);
+                    // if (priorData) {
+                    //     window.clearInterval(priorData);
+                    // }
+
+                    document.getElementById('chat-form').reset();
+                    var send_username = $(this).attr('data-send_username');
+                    var reci_username = $(this).attr('data-reci_username');
+                    var send_user_pic = $(this).attr('data-send_user_pic');
+                    var reci_user_pic = $(this).attr('data-reci_user_pic');
+                    var chat_id = 0;
+                    // var fullname = $(this).attr('data-fullname');
+                    var status = $(this).attr('data-status');
+                    console.log(send_username);
+                    console.log(reci_username);
+
+                    var currentRequest = null;
+                    var amount1 = 0;
+                    var amount2 = 0;
+                    var amount3 = 0;
+
+
+                        currentRequest = jQuery.ajax({
+                            type: 'post',
+                            url: '../../../views/user/contents/chat/', //Here you will fetch records
+                            data: {'send_username': send_username, 'reci_username': reci_username,'chat_id': chat_id, 'chat_type': 'chat_data'}, //Pass $id
+                            dataType: 'json',
+                            async: true,
+                            cache: false,
+                            context: this,
+                            beforeSend: function () {
+                                if (currentRequest != null) {
+                                    currentRequest.abort();
+                                }
+
+                            },
+                            success: function (data) {
+                                var len = data['chat_data'].length;
+                                console.log(len);
+                                var username = send_username;
+                                username = reci_username;
+                                var fullname = data['read_data'][0]['fullname']
+                                // console.log(send_username);
+                                // console.log(reci_username);
+                                // console.log(send_user_pic);
+                                // console.log(reci_user_pic);
+                                // console.log(fullname);
+                                // console.log(status);
+                                // console.log(data['chat_data']);
+                                // console.log($('.chat_ntf').attr('data-send_username'));
+                                // console.log(data['read_data'][0]['unread_count']);
+
+                                document.getElementById('chat_send_username').value = send_username;
+                                document.getElementById('chat_reci_username').value = reci_username;
+                                if(len!=0) {
+                                    chat_id = data['chat_data'][len - 1]['chat_id'];
+                                }
+                                if (chat_id != 0) {
+                                    if (status == 1) {
+                                        $('#chat-info').empty();
+                                        // var status_class = "status-mark position-left bg-success";
+                                        var user = "<a href=" + '../account/?user=' + username + ">" + fullname + ' ' + "</a><sup style='color: green'>online</sup>";
+                                        $('#chat-info').append(user);//Show fetched data from user
+                                        // document.getElementById("chat_stat").className += "status-mark position-left bg-success";
+                                    }
+                                    if (status == 0) {
+                                        $('#chat-info').empty();
+                                        // var status_class = "status-mark,position-left,bg-warning";
+                                        var user = "<a href=" + '../account/?user=' + username + ">" + fullname + ' ' + "</a><sup style='color: red'>offline</sup>";
+                                        $('#chat-info').append(user);//Show fetched data from user
+                                        // document.getElementById("chat_stat").className += "status-mark position-left bg-warning";
+                                    }
+                                    // if (amount3 != len) {
+                                    //     amount2 = len;
+                                    //     amount1 = amount2 - amount1;
+                                    //     amount3 = len - amount1;
+                                    //     if (amount1 == len) {
+                                    //         $('#chat-content').empty();
+                                    //     }
+                                    //     // console.log(amount3);
+                                    //     // console.log(len);
+                                    // }
+                                    // console.log(len);
+                                    for (var i = 0; i < len; i++) {
+                                        // console.log(amount3);
+                                        // console.log(len);
+                                        var chat_from = null;
+                                        chat_from = data['chat_data'][i]['chat_from'];
+                                        var data_type = null;
+                                        data_type = data['chat_data'][i]['chat_data_type'];
+                                        var data_details = null;
+                                        data_details = data['chat_data'][i]['chat_data_details'];
+                                        var local = null;
+                                        local = data['chat_data'][i]['chat_utc_time'];
+                                        var localDate = new Date(local);
+                                        var today = new Date();
+                                        var old_date = localDate.getDate();
+                                        var new_date = today.getDate();
+                                        var old_month = localDate.getMonth();
+                                        var new_month = today.getMonth();
+                                        var old_year = localDate.getYear();
+                                        var new_year = today.getYear();
+                                        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                                        var day = days[localDate.getDay()];
+                                        if ((new_date - old_date) == 0) {
+                                            day = 'Today';
+
+                                            var localDateString = localDate.toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            });
+
+                                            var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            });
+                                            var chat_time = day + ', ' + localDateString + ', ' + localTimeString;
+                                        }
+                                        if ((new_date - old_date) == 1) {
+                                            day = 'Yesterday';
+
+                                            var localDateString = localDate.toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            });
+
+                                            var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            });
+                                            var chat_time = day + ', ' + localDateString + ', ' + localTimeString;
+                                        }
+                                        if (((new_date - old_date) > 1) || ((new_date - old_date) < 0)) {
+
+
+                                            var localDateString = localDate.toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            });
+
+
+                                            var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            });
+
+                                            var chat_time = day + ', ' + localDateString + ', ' + localTimeString;
+                                        }
+
+
+                                        // console.log(chat_from);
+                                        // console.log(chat_time);
+                                        // console.log(data_type);
+                                        // console.log(data_details);
+                                        if (chat_from == reci_username) {
+                                            // console.log(data[i]);
+                                            if (data_type == 'text') {
+                                                var chat_data_user = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + reci_username + "><img src=" + '../../../img/' + reci_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'white-space:pre-line' + ">" + data_details + "</div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div></li>";
+//                                        $(".chat-content").append(chat_data);
+                                                $('#chat-content').append(chat_data_user);//Show fetched data from user
+
+                                            }
+                                            if (data_type == 'image') {
+                                                var rest = data_details.split(":");
+                                                if (rest[1] == null) {
+                                                    data_details = rest[0];
+                                                    data_name = rest[0];
+                                                } else {
+                                                    data_details = rest[1];
+                                                    data_name = rest[0];
+                                                }
+                                                if(data_details=='broken_image_link.png'){
+                                                    var chat_data_user = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + reci_username + "><img src=" + '../../../img/' + reci_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div><div class=" + 'media-body' + "><div class=" + 'media-content' + "><img src=" + '../../../messages/image/' + data_details + " class=" + 'img-thumbnail' + "></div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div></li>";
+                                                    $('#chat-content').append(chat_data_user);//Show fetched data from user
+                                                }else{
+                                                    var chat_data_user = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + reci_username + "><img src=" + '../../../img/' + reci_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div><div class=" + 'media-body' + "><div class=" + 'media-content' + "><img src=" + '../../../messages/image/' + data_details + " class=" + 'img-thumbnail' + "><br/><a href=" + '../../../messages/image/' + data_details + " download>[Download]</a></div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div></li>";
+                                                    $('#chat-content').append(chat_data_user);//Show fetched data from user
+
+                                                }
+
+                                            }
+                                            if (data_type == 'file') {
+                                                var rest = data_details.split(":");
+                                                if (rest[1] == null) {
+                                                    data_details = rest[0];
+                                                    data_name = rest[0];
+                                                } else {
+                                                    data_details = rest[1];
+                                                    data_name = rest[0];
+                                                }
+                                                if(data_details=='broken_image_link.png'){
+                                                    var chat_data_user = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + reci_username + "><img src=" + '../../../img/' + reci_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div><div class=" + 'media-body' + "><div class=" + 'media-content' + "><a href=" + '../../../messages/file/' + data_details + " download><u>" + data_name + "</u></a></div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div></li>";
+                                                    $('#chat-content').append(chat_data_user);//Show fetched data from user
+                                                }else{
+                                                    var chat_data_user = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a href=" + '../account/?user=' + reci_username + "><img src=" + '../../../img/' + reci_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div><div class=" + 'media-body' + "><div class=" + 'media-content' + "><a href=" + '../../../messages/file/' + data_details + " download><u>" + data_name + "</u><br/><a href=" + '../../../messages/file/' + data_details + " download>[Download]</a></a></div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div></li>";
+                                                    $('#chat-content').append(chat_data_user);//Show fetched data from user
+
+                                                }
+                                            }
+                                            if (i == (len - 1)) {
+                                                var elem = document.getElementById('chat-content');
+                                                elem.scrollTop = elem.scrollHeight;
+                                            }
+                                        }
+                                        if (chat_from == send_username) {
+                                            if (data_type == 'text') {
+                                                var chat_data_con = "<li class=" + 'media' + "><li class=" + 'reversed' + "><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'background-color:#3c4141;border-color:#3c4141;white-space:pre-line' + ">" + data_details + "</div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div><div class=" + 'media-right' + "><a href=" + '../account/?user=' + send_username + "><img src=" + '../../../img/' + send_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div></li></li>";
+//                                        $(".chat-content").append(chat_data);
+                                                $('#chat-content').append(chat_data_con);//Show fetched data from user
+                                            }
+                                            if (data_type == 'image') {
+                                                var rest = data_details.split(":");
+                                                if (rest[1] == null) {
+                                                    data_details = rest[0];
+                                                    data_name = rest[0];
+                                                } else {
+                                                    data_details = rest[1];
+                                                    data_name = rest[0];
+                                                }
+                                                var chat_data_con = "<li class=" + 'media' + "><li class=" + 'reversed' + "><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'background-color:#3c4141;border-color:#3c4141' + "><img src=" + '../../../messages/image/' + data_details + " class=" + 'img-thumbnail' + "><br/><a href=" + '../../../messages/image/' + data_details + " download>[Download]</a></div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div><div class=" + 'media-right' + "><a href=" + '../account/?user=' + send_username + "><img src=" + '../../../img/' + send_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div></li></li>";
+                                                $('#chat-content').append(chat_data_con);//Show fetched data from user
+                                            }
+                                            if (data_type == 'file') {
+                                                var rest = data_details.split(":");
+                                                if (rest[1] == null) {
+                                                    data_details = rest[0];
+                                                    data_name = rest[0];
+                                                } else {
+                                                    data_details = rest[1];
+                                                    data_name = rest[0];
+                                                }
+                                                var chat_data_con = "<li class=" + 'media' + "><li class=" + 'reversed' + "><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'background-color:#3c4141;border-color:#3c4141' + "><a href=" + '../../../messages/file/' + data_details + " download><u>" + data_name + "</u></a><a href=" + '../../../messages/file/' + data_details + " download>Download</a></div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + chat_time + "<a href=" + '#' + "></a></span></div></div></div><div class=" + 'media-right' + "><a href=" + '../account/?user=' + send_username + "><img src=" + '../../../img/' + send_user_pic + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div></li></li>";
+                                                $('#chat-content').append(chat_data_con);//Show fetched data from user
+                                            }
+                                        }
+                                        if (i == (len - 1)) {
+                                            var elem = document.getElementById('chat-content');
+                                            elem.scrollTop = elem.scrollHeight;
+                                        }
+
+                                    }
+                                    console.log(chat_id);
+
+                                } else {
+                                    if (status == 1) {
+                                        $('#chat-info').empty();
+                                        // var status_class = "status-mark position-left bg-success";
+                                        var user = "<a href=" + '../account/?user=' + username + ">" + fullname + ' ' + "</a><sup style='color: green'>online</sup>";
+                                        $('#chat-info').append(user);//Show fetched data from user
+                                        // document.getElementById("chat_stat").className += "status-mark position-left bg-success";
+                                    }
+                                    if (status == 0) {
+                                        $('#chat-info').empty();
+                                        // var status_class = "status-mark,position-left,bg-warning";
+                                        var user = "<a href=" + '../account/?user=' + username + ">" + fullname + ' ' + "</a><sup style='color: red'>offline</sup>";
+                                        $('#chat-info').append(user);//Show fetched data from user
+                                        // document.getElementById("chat_stat").className += "status-mark position-left bg-warning";
+                                    }
+                                    $('#chat-content').empty();
+                                    var chat_data_user = "<div class=" + 'text-center' + "><span>" + 'No Messages' + "</span></div>";
+                                    $('#chat-content').append(chat_data_user);//Show fetched data from user
+
+                                    chat_id = 0;
+                                }
+
+                            },
+                            complete: function (response) {
+
+                            },
+                            error: function (e) {
+                                // Error
+                            }
+                        });
+
+
+
+                    // if (e == 0) {
+                    //     clearInterval(ajaxFn);
+                    // }
+                    // setTimeout(() => { clearInterval(ajaxFn);}, 2000);
+                    // setTimeout(() => { setInterval(ajaxFn);}, 5000);
+                    // $('.mychat').data('refresh', ajaxFn);
+
+                });
+            },
+            error: function (e) {
+                // Error
+            }
+
+        });
+    });
+},5000);
+
+
+    // setTimeout(function ajaxTlBr() {
+    //     window.load = $('.toolbar_chat_users').each(function () {
+    //         var send_username = $(this).attr('data-send_username');
+    //         var send_pic = $(this).attr('data-send_user_pic');
+    //         $.ajax({
+    //             type: 'post',
+    //             url: '../contents/chat/chat.php', //Here you will fetch records
+    //             data: {'send_username': send_username, 'chat_type': 'chat_tlbr'}, //Pass $id
+    //             dataType: 'json',
+    //             cache: false,
+    //             context: this,
+    //             success: function (data) {
+    //                 // console.log(data);
+    //                 // console.log(data.length);
+    //                 if (data.length != 0) {
+    //
+    //                     // console.log(data[0]['unread_rows']);
+    //
+    //                         $(this).empty();
+    //                         $('#unreadmsg').empty();
+    //                         $('#unreadmsg').append(data[0]['unread_rows']);
+    //                         for (i = 0; i < data.length; i++) {
+    //
+    //                             local = data[i]['chat_utc_time'];
+    //                             var localDate = new Date(local);
+    //                             var today = new Date();
+    //                             var old_date = localDate.getDate();
+    //                             var new_date = today.getDate();
+    //                             var old_month = localDate.getMonth();
+    //                             var new_month = today.getMonth();
+    //                             var old_year = localDate.getYear();
+    //                             var new_year = today.getYear();
+    //                             var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    //                             var day = days[localDate.getDay()];
+    //                             if ((new_date - old_date) == 0) {
+    //                                 day = 'Today';
+    //
+    //                                 var localDateString = localDate.toLocaleDateString(undefined, {
+    //                                     month: 'short',
+    //                                     day: 'numeric'
+    //                                 });
+    //
+    //                                 var localTimeString = localDate.toLocaleTimeString(undefined, {
+    //                                     hour: '2-digit',
+    //                                     minute: '2-digit'
+    //                                 });
+    //                                 var chat_time = day + '\n' + localTimeString;
+    //                             }
+    //                             if ((new_date - old_date) == 1) {
+    //                                 day = 'Yesterday';
+    //
+    //                                 var localDateString = localDate.toLocaleDateString(undefined, {
+    //                                     month: 'short',
+    //                                     day: 'numeric'
+    //                                 });
+    //
+    //                                 var localTimeString = localDate.toLocaleTimeString(undefined, {
+    //                                     hour: '2-digit',
+    //                                     minute: '2-digit'
+    //                                 });
+    //                                 var chat_time = day + '\n' + localTimeString;
+    //                             }
+    //                             if (((new_date - old_date) > 1) || ((new_date - old_date) < 0)) {
+    //
+    //
+    //                                 var localDateString = localDate.toLocaleDateString(undefined, {
+    //                                     month: 'short',
+    //                                     day: 'numeric'
+    //                                 });
+    //
+    //
+    //                                 var localTimeString = localDate.toLocaleTimeString(undefined, {
+    //                                     hour: '2-digit',
+    //                                     minute: '2-digit'
+    //                                 });
+    //
+    //                                 var chat_time = localDateString + '\n' + localTimeString;
+    //                             }
+    //
+    //
+    //                             if (data[i]['unread_count'] == null) {
+    //                                 data[i]['unread_count'] = '';
+    //                             }
+    //
+    //                             if (data[i]['chat_data_type'] == 'text') {
+    //                                 if (data[i]['chat_data_details'].length > 45) {
+    //                                     var str = data[i]['chat_data_details'];
+    //                                     data[i]['chat_data_details'] = str.substring(0, 45);
+    //                                 }
+    //
+    //                                 var data_show = "<li class=" + 'media' + "><div class=" + 'media-left' + "><img src=" + '../../../img/' + data[i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "><span class=" + 'unread_span' + ">" + data[i]['unread_count'] + "</span></div><div class=" + 'media-body' + "><a href=" + '#chat' + " class=" + 'mychat' + "  data-toggle=" + 'modal' + " data-ref=" + 'clearInterval(ajaxFn)' + " data-status=" + data[i]['is_active'] + " data-send_username=" + send_username + " data-reci_username=" + data[i]['username'] + " data-reci_user_pic=" + data[i]['user_pic'] + " data-send_user_pic=" + send_pic + "><span class=" + 'text-semibold' + ">" + data[i]['fullname'] + "</span><span class=" + 'time_class' + " style=" + 'white-space:pre-line' + ">" + chat_time + "</span></a><span class=" + 'text-muted' + ">" + data[i]['chat_data_details'] + "</span></div></li>";
+    //                                 $(this).append(data_show);
+    //
+    //                             }
+    //                             if (data[i]['chat_data_type'] == 'image') {
+    //                                 data[i]['chat_data_details'] = 'Image';
+    //
+    //
+    //                                 var data_show = "<li class=" + 'media' + "><div class=" + 'media-left' + "><img src=" + '../../../img/' + data[i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "><span class=" + 'unread_span' + ">" + data[i]['unread_count'] + "</span></div><div class=" + 'media-body' + "><a  href=" + '#chat' + " class=" + 'mychat' + "  data-toggle=" + 'modal' + " data-ref=" + 'clearInterval(ajaxFn)' + " data-status=" + data[i]['is_active'] + " data-send_username=" + send_username + " data-reci_username=" + data[i]['username'] + " data-reci_user_pic=" + data[i]['user_pic'] + " data-send_user_pic=" + send_pic + "><span class=" + 'text-semibold' + ">" + data[i]['fullname'] + "</span><span class=" + 'time_class' + " style=" + 'white-space:pre-line' + ">" + chat_time + "</span></a><span class=" + 'text-muted' + ">" + data[i]['chat_data_details'] + "</span></div></li>";
+    //                                 $(this).append(data_show);
+    //
+    //                             }
+    //                             if (data[i]['chat_data_type'] == 'file') {
+    //                                 data[i]['chat_data_details'] = 'File';
+    //
+    //
+    //                                 var data_show = "<li class=" + 'media' + "><div class=" + 'media-left' + "><img src=" + '../../../img/' + data[i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "s><span class=" + 'unread_span' + ">" + data[i]['unread_count'] + "</span></div><div class=" + 'media-body' + "><a href=" + '#chat' + " class=" + 'mychat' + "  data-toggle=" + 'modal' + " data-ref=" + 'clearInterval(ajaxFn)' + " data-status=" + data[i]['is_active'] + " data-send_username=" + send_username + " data-reci_username=" + data[i]['username'] + " data-reci_user_pic=" + data[i]['user_pic'] + " data-send_user_pic=" + send_pic + "><span class=" + 'text-semibold' + ">" + data[i]['fullname'] + "</span><span class=" + 'time_class' + " style=" + 'white-space:pre-line' + ">" + chat_time + "</span></a><span class=" + 'text-muted' + ">" + data[i]['chat_data_details'] + "</span></div></li>";
+    //                                 $(this).append(data_show);
+    //
+    //                             }
+    //
+    //                             $('.time_class').addClass('media-annotation').addClass('pull-right');
+    //                             $('.mychat').addClass('media-heading');
+    //                             $('.unread_span').addClass('badge').addClass('bg-blue-400').addClass('media-badge');
+    //                         }
+    //
+    //                 } else {
+    //                     $('#unreadmsg').empty();
+    //                     $('#unreadmsg').append(0);
+    //                     $(this).empty();
+    //                     $(this).append("<center><h6>" + 'No Messages' + "</h6></center>");
+    //                 }
+    //
+    //             },
+    //             complete: function (data) {
+    //                 setTimeout(ajaxTlBr,60000);
+    //             },
+    //             error: function (e) {
+    //                 // Error
+    //             }
+    //
+    //         });
+    //     });
+    //
+    // },15000);
+
+});
+
+
+
+// function submit_by_id() {
+//     var send_username = $('.mychat').attr('data-send_username');
+//     var reci_username = $('.mychat').attr('data-reci_username');
+// }
+
+// if (obj.shiftKey && obj.keyCode == 13) {
+//     $(this).val($(this).val() + "\n");
+//     return;
+// }

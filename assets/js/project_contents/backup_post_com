@@ -1,0 +1,373 @@
+$(document).ready(function() {
+
+    $('.seen-change').click(function (e) {
+        var send_username = $(this).attr('data-send_username');
+        var reci_username = $(this).attr('data-reci_username');
+        var send_fullname = $(this).attr('data-send_fullname');
+        var reci_fullname = $(this).attr('data-reci_fullname');
+        var post_id = $(this).attr('data-pid');
+        // console.log(send_username);
+        // console.log(send_fullname);
+        // console.log(reci_fullname);
+        // console.log(reci_username);
+        // console.log(post_id);
+
+        var currentRequest = null;
+        currentRequest = jQuery.ajax({
+            type: 'post',
+            url: '../../../views/user/contents/seen/seen.php', //Here you will fetch records
+            data: {'send_username': send_username, 'reci_username': reci_username, 'send_fullname': send_fullname, 'reci_fullname': reci_fullname, 'post_id': post_id,  'seen_type': 'seen_info'}, //Pass $id
+            dataType: 'json',
+            cache: false,
+            context: this,
+            beforeSend: function () {
+                if (currentRequest != null) {
+                    currentRequest.abort();
+                }
+
+            },
+            success: function (data) {
+                // console.log(data);
+
+                if(data['seen_status']==1){
+                    $('#seen-count'+post_id).empty();
+                    var seen_count ="<i class="+'seen-icon-det'+post_id+ "></i>"+data['seen_count'];
+                    $('#seen-count'+post_id).append(seen_count);//Show fetched data from seen user
+                    $('.seen-icon-det'+post_id).addClass('icon-eye4').addClass('text-primary').addClass('position-left').addClass('grow').addClass('hover');
+                    $('#seen-count'+post_id).attr('data-original-title', 'Unseen');
+                }else{
+                    $('#seen-count'+post_id).empty();
+                    var seen_count ="<i class="+'seen-icon-det'+post_id+ "></i>"+data['seen_count'];
+                    $('#seen-count'+post_id).append(seen_count);//Show fetched data from seen user
+                    $('.seen-icon-det'+post_id).addClass('icon-eye4').addClass('position-left').addClass('grow').addClass('hover');
+                    $('#seen-count'+post_id).attr('data-original-title', 'Seen');
+                }
+            },
+            complete: function (response) {
+                // $('.opnmycomment').click();
+
+                // setTimeout(ajaxFn,15000);
+            },
+            error: function (e) {
+                // Error
+            }
+        });
+
+    });
+
+        $('.opnmycomment').click(function (e) {
+            var send_username = $(this).attr('data-send_username');
+            var reci_username = $(this).attr('data-reci_username');
+            var send_user_pic = $(this).attr('data-send_user_pic');
+            var reci_user_pic = $(this).attr('data-reci_user_pic');
+            var post_id = $(this).attr('data-pid');
+        // console.log(send_username);
+        // console.log(reci_username);
+        // console.log(send_user_pic);
+        // console.log(reci_user_pic);
+        // console.log(post_id);
+
+        var currentRequest = null;
+            currentRequest = jQuery.ajax({
+                type: 'post',
+                url: '../../../views/user/contents/comment/comment.php', //Here you will fetch records
+                data: {'send_username': send_username, 'reci_username': reci_username, 'post_id': post_id,  'comment_type': 'post_info'}, //Pass $id
+                dataType: 'json',
+                cache: false,
+                context: this,
+                beforeSend: function () {
+                    if (currentRequest != null) {
+                        currentRequest.abort();
+                    }
+
+                },
+                success: function (data) {
+                        // console.log(data);
+                    // $('.comment-content').empty();
+                    var len = data['comment_info'].length;
+                    // console.log(send_username);
+                    // console.log(reci_username);
+                    // console.log(send_user_pic);
+                    // console.log(reci_user_pic);
+                    // console.log(fullname);
+                    // console.log(status);
+                    // console.log(data['chat_data']);
+                    $('#comment-content'+post_id).empty();
+                    var comment_user ="<li class=" + 'media' + "><div class=" + 'media-right' + "><a id="+'comment-content'+post_id+" class="+'clsmycomment'+" data-pid="+post_id+"><u>"+'Hide comments'+"</u></a></div></li>";
+                    $('#comment-content'+post_id).append(comment_user);//Show fetched data from comment user
+                    if(len!=0) {
+                        for (i = 0; i < len; i++) {
+
+                            local = data['comment_info'][i]['comment_utc_time'];
+                            // console.log(local);
+                            var localDate = new Date(local);
+                            var today = new Date();
+                            var old_date = localDate.getDate();
+                            var new_date = today.getDate();
+                            var old_month = localDate.getMonth();
+                            var new_month = today.getMonth();
+                            var old_year = localDate.getYear();
+                            var new_year = today.getYear();
+                            var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                            var day = days[localDate.getDay()];
+                            if ((new_date - old_date) == 0) {
+                                day = 'Today';
+
+                                var localDateString = localDate.toLocaleDateString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
+
+                                var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                var comment_time = day + ', ' + localDateString + ' at ' + localTimeString;
+                            }
+                            if ((new_date - old_date) == 1) {
+                                day = 'Yesterday';
+
+                                var localDateString = localDate.toLocaleDateString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
+
+                                var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                var comment_time = day + ', ' + localDateString + ' at ' + localTimeString;
+                            }
+                            if (((new_date - old_date) > 1) || ((new_date - old_date) < 0)) {
+
+
+                                var localDateString = localDate.toLocaleDateString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
+
+
+                                var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+
+                                var comment_time = day + ', ' + localDateString + ' at ' + localTimeString;
+                            }
+                            // console.log(comment_time);
+
+                            var comment_user = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a id="+'user-img'+post_id+" href=" + '../account/?user=' + data['comment_info'][i]['comment_username'] + " title="+data['comment_info'][i]['fullname']+" data-popup="+'tooltip'+"><img src=" + '../../../img/' + data['comment_info'][i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'white-space:pre-line' + ">" + data['comment_info'][i]['comment_details'] + "</div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + comment_time + "<a href=" + '#' + "></a></span></div></div></div></li>";
+                            $('#comment-content'+post_id).append(comment_user);//Show fetched data from comment user
+
+                        }
+                    }else{
+                        var comment_null = "<li class=" + 'media' + "><div class=" + 'media-content' + "></div><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'white-space:pre-line' + "><center>" + 'No Comment Yet' + "</center></div></div></li>";
+                        $('#comment-content'+post_id).append(comment_null);//Show fetched data from comment user
+                    }
+                    if(data['seen_info']['seen_status']==1){
+                        $('#seen-count'+post_id).empty();
+                        var seen_count ="<i class="+'seen-icon-det'+post_id+ "></i>"+data['seen_info']['seen_count'];
+                        $('#seen-count'+post_id).append(seen_count);//Show fetched data from seen user
+                        $('.seen-icon-det'+post_id).addClass('icon-eye4').addClass('text-primary').addClass('position-left').addClass('grow').addClass('hover');
+                        $('#seen-count'+post_id).attr('data-original-title', 'Unseen');
+                        $('#comment-count'+post_id).empty();
+                        var comment_count ="<i class="+'comment-icon-det'+post_id+ "></i>"+data['comment_count'];
+                        $('#comment-count'+post_id).append(comment_count);//Show fetched data from comment user
+                        $('.comment-icon-det'+post_id).addClass('icon-comment-discussion').addClass('position-left').addClass('grow').addClass('hover');
+                    }else{
+                        $('#seen-count'+post_id).empty();
+                        var seen_count ="<i class="+'seen-icon-det'+post_id+ "></i>"+data['seen_info']['seen_count'];
+                        $('#seen-count'+post_id).append(seen_count);//Show fetched data from seen user
+                        $('.seen-icon-det'+post_id).addClass('icon-eye4').addClass('position-left').addClass('grow').addClass('hover');
+                        $('#seen-count'+post_id).attr('data-original-title', 'Seen');
+                        $('#comment-count'+post_id).empty();
+                        var comment_count ="<i class="+'comment-icon-det'+post_id+ "></i>"+data['comment_count'];
+                        $('#comment-count'+post_id).append(comment_count);//Show fetched data from comment user
+                        $('.comment-icon-det'+post_id).addClass('icon-comment-discussion').addClass('position-left').addClass('grow').addClass('hover');
+                    }
+
+                },
+                complete: function (response) {
+                    $('.clsmycomment').click(function (e) {
+                        var post_id = $(this).attr('data-pid');
+                        $('#comment-content'+post_id).empty();
+                    });
+
+                    // setTimeout(ajaxFn,15000);
+                },
+                error: function (e) {
+                    // Error
+                }
+            });
+
+    });
+
+        $('.submitCommentform').click(function (f) {
+
+            var options = {
+                type: 'post',
+                url: '../../../views/user/contents/comment/comment.php',
+                dataType: 'json',
+                cache: false,
+                context: this,
+                beforeSend: function () {
+
+                    document.getElementById('comment-form' + f.target.id).reset();
+                },
+                success: function (data) {
+                    console.log(data);
+
+                },
+                complete: function (response) {
+
+                },
+                error: function () {
+
+
+                }
+
+            };
+
+            $("#comment-form"+f.target.id).ajaxForm(options);
+        });
+
+        $(".comment-text").keydown(function (event) {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                // console.log(event.target.value);
+                usn_comment_message = event.target.value;
+                comment_post_id = $(this).attr('data-post_id');
+                comment_send_username = $(this).attr('data-send_username');
+                comment_reci_username = $(this).attr('data-reci_username');
+                comment_send_fullname = $(this).attr('data-send_fullname');
+                comment_reci_fullname = $(this).attr('data-reci_fullname');
+                // $(".submitCommentform").click();
+
+                var currentRequest = null;
+                currentRequest = jQuery.ajax({
+                    type: 'post',
+                    url: '../../../views/user/contents/comment/comment.php', //Here you will fetch records
+                    data: {'usn_comment_message': usn_comment_message, 'comment_post_id': comment_post_id, 'comment_send_username': comment_send_username, 'comment_reci_username': comment_reci_username, 'comment_send_fullname': comment_send_fullname,  'comment_reci_fullname': comment_reci_fullname,  'comment_type': 'comment_post'}, //Pass $id
+                    dataType: 'json',
+                    cache: false,
+                    context: this,
+                    beforeSend: function () {
+                        document.getElementById('comment-form'+comment_post_id).reset();
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        // $('.comment-content').empty();
+                        var len = data['comment_info'].length;
+                        // console.log(send_username);
+                        // console.log(reci_username);
+                        // console.log(send_user_pic);
+                        // console.log(reci_user_pic);
+                        // console.log(fullname);
+                        // console.log(status);
+                        // console.log(data['chat_data']);
+                        $('#comment-content'+comment_post_id).empty();
+                        var comment_user ="<li class=" + 'media' + "><div class=" + 'media-right' + "><a id="+'comment-content'+comment_post_id+" class="+'clsmycomment'+" data-pid="+comment_post_id+"><u>"+'Hide comments'+"</u></a></div></li>";
+                        $('#comment-content'+comment_post_id).append(comment_user);//Show fetched data from comment user
+                        if(len!=0) {
+                            for (i = 0; i < len; i++) {
+
+                                local = data['comment_info'][i]['comment_utc_time'];
+                                // console.log(local);
+                                var localDate = new Date(local);
+                                var today = new Date();
+                                var old_date = localDate.getDate();
+                                var new_date = today.getDate();
+                                var old_month = localDate.getMonth();
+                                var new_month = today.getMonth();
+                                var old_year = localDate.getYear();
+                                var new_year = today.getYear();
+                                var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                                var day = days[localDate.getDay()];
+                                if ((new_date - old_date) == 0) {
+                                    day = 'Today';
+
+                                    var localDateString = localDate.toLocaleDateString(undefined, {
+                                        month: 'short',
+                                        day: 'numeric'
+                                    });
+
+                                    var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+                                    var comment_time = day + ', ' + localDateString + ' at ' + localTimeString;
+                                }
+                                if ((new_date - old_date) == 1) {
+                                    day = 'Yesterday';
+
+                                    var localDateString = localDate.toLocaleDateString(undefined, {
+                                        month: 'short',
+                                        day: 'numeric'
+                                    });
+
+                                    var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+                                    var comment_time = day + ', ' + localDateString + ' at ' + localTimeString;
+                                }
+                                if (((new_date - old_date) > 1) || ((new_date - old_date) < 0)) {
+
+
+                                    var localDateString = localDate.toLocaleDateString(undefined, {
+                                        month: 'short',
+                                        day: 'numeric'
+                                    });
+
+
+                                    var localTimeString = localDate.toLocaleTimeString(undefined, {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+
+                                    var comment_time = day + ', ' + localDateString + ' at ' + localTimeString;
+                                }
+                                // console.log(comment_time);
+
+                                var comment_user = "<li class=" + 'media' + "><div class=" + 'media-left' + "><a id="+'user-img'+comment_post_id+" href=" + '../account/?user=' + data['comment_info'][i]['comment_username'] + " title="+data['comment_info'][i]['fullname']+" data-popup="+'tooltip'+"><img src=" + '../../../img/' + data['comment_info'][i]['user_pic'] + " class=" + 'img-circle' + " style=" + 'object-fit:cover' + "></a></div><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'white-space:pre-line' + ">" + data['comment_info'][i]['comment_details'] + "</div><div class=" + 'media-annotation' + "><div class=" + 'display-block' + "><span class=" + 'mt-10' + ">" + comment_time + "<a href=" + '#' + "></a></span></div></div></div></li>";
+                                $('#comment-content'+post_id).append(comment_user);//Show fetched data from comment user
+
+                            }
+                        }else{
+                            var comment_null = "<li class=" + 'media' + "><div class=" + 'media-content' + "></div><div class=" + 'media-body' + "><div class=" + 'media-content' + " style=" + 'white-space:pre-line' + "><center>" + 'No Comment Yet' + "</center></div></div></li>";
+                            $('#comment-content'+comment_post_id).append(comment_null);//Show fetched data from comment user
+                        }
+                        if(data['seen_info']['seen_status']==1){
+                            $('#seen-count'+comment_post_id).empty();
+                            var seen_count ="<i class="+'seen-icon-det'+comment_post_id+ "></i>"+data['seen_info']['seen_count'];
+                            $('#seen-count'+comment_post_id).append(seen_count);//Show fetched data from seen user
+                            $('.seen-icon-det'+comment_post_id).addClass('icon-eye4').addClass('text-primary').addClass('position-left').addClass('grow').addClass('hover');
+                            $('#seen-count'+comment_post_id).attr('data-original-title', 'Unseen');
+                            $('#comment-count'+comment_post_id).empty();
+                            var comment_count ="<i class="+'comment-icon-det'+comment_post_id+ "></i>"+data['comment_count'];
+                            $('#comment-count'+comment_post_id).append(comment_count);//Show fetched data from comment user
+                            $('.comment-icon-det'+comment_post_id).addClass('icon-comment-discussion').addClass('position-left').addClass('grow').addClass('hover');
+                        }else{
+                            $('#seen-count'+comment_post_id).empty();
+                            var seen_count ="<i class="+'seen-icon-det'+comment_post_id+ "></i>"+data['seen_info']['seen_count'];
+                            $('#seen-count'+comment_post_id).append(seen_count);//Show fetched data from seen user
+                            $('.seen-icon-det'+comment_post_id).addClass('icon-eye4').addClass('position-left').addClass('grow').addClass('hover');
+                            $('#seen-count'+comment_post_id).attr('data-original-title', 'Seen');
+                            $('#comment-count'+comment_post_id).empty();
+                            var comment_count ="<i class="+'comment-icon-det'+comment_post_id+ "></i>"+data['comment_count'];
+                            $('#comment-count'+comment_post_id).append(comment_count);//Show fetched data from comment user
+                            $('.comment-icon-det'+comment_post_id).addClass('icon-comment-discussion').addClass('position-left').addClass('grow').addClass('hover');
+                        }
+                    },
+                    complete: function (response) {
+
+                    },
+                    error: function (e) {
+                        // Error
+                    }
+                });
+
+
+            }
+        });
+});

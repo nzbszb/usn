@@ -1,0 +1,19 @@
+    var d = new Date();
+
+
+            var localDate = new Date();
+            var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                        var day = days[localDate.getDay()];
+            var localDateString = localDate.toLocaleDateString(undefined, {
+                day : 'numeric',
+                month : 'short',
+                year : 'numeric'
+            });
+
+
+            var localTimeString = localDate.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+
+            console.log(localDateString+', '+localTimeString);

@@ -1,0 +1,79 @@
+$(document).ready(function () {
+    var arr  = [];
+
+
+     $('.chat_ntf').each(function () {
+        var send_username = $(this).attr('data-send_username');
+        var reci_username = $(this).attr('data-reci_username');
+        var row = {'send_username': send_username, 'reci_username': reci_username, 'chat_type': 'chat_data'};
+        arr.push(row);
+
+    });
+    console.log(arr);
+    for(i=0;i<arr.length;i++) {
+        $.ajax({
+            type: 'post',
+            url: '../contents/chat/chat.php', //Here you will fetch records
+            data: arr[i], //Pass $id
+            dataType: 'json',
+            asynch: false,
+            cache: false,
+            context: this,
+            beforeSend: function () {
+
+            },
+            success: function (data) {
+
+                console.log(data);
+                console.log(arr);
+                console.log(i);
+
+            },
+            complete: function (data) {
+                // setTimeout(ajaxChtNtf,3000);
+            },
+            error: function (e) {
+                // Error
+            }
+        });
+    }
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+    -----------------------------------------------------------------------------------------------
+
+
+    $('.toolbar_chat_users').change(function () {
+            var send_username = $(this).attr('data-send_username');
+
+
+            $.ajax({
+                type: 'post',
+                url: '../contents/chat/chat.php', //Here you will fetch records
+                data: {'send_username': send_username}, //Pass $id
+                dataType: 'json',
+                cache: false,
+                context: this,
+                success: function (data) {
+                    console.log($data);
+
+                },
+                complete: function (data) {
+
+                },
+                error: function (e) {
+                    // Error
+                }
+
+        });
+    });
